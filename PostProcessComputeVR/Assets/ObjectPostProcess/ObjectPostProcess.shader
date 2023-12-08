@@ -1,3 +1,8 @@
+/*
+* Sources
+* - https://gist.github.com/bgolus/a07ed65602c009d5e2f753826e8078a0
+*/
+
 Shader "Unlit/ObjectPostProcess"
 {
     Properties
@@ -82,13 +87,19 @@ Shader "Unlit/ObjectPostProcess"
                     return rawCameraDepthTexture.r;
                 #elif defined (_DEPTHTYPE_FROMCAMERADEPTHNORMALS)
                     float4 rawCameraDepthNormalsTexture = tex2D(_CameraDepthNormalsTexture, uv);
-                    rawCameraDepthNormalsTexture = 1 - rawCameraDepthNormalsTexture;
+
+                    //rawCameraDepthNormalsTexture = 1 - rawCameraDepthNormalsTexture;
                     float decodedFloat = DecodeFloatRG(rawCameraDepthNormalsTexture.zw);
                     //decodedFloat = decodedFloat * _ProjectionParams.w;
-                    decodedFloat = decodedFloat * _ZBufferParams.w;
+                    //decodedFloat = decodedFloat * _ZBufferParams.w;
                     //decodedFloat = decodedFloat * _ZBufferParams.z;
                     //decodedFloat = decodedFloat + _ProjectionParams.y;
                     //decodedFloat = UNITY_Z_0_FAR_FROM_CLIPSPACE(decodedFloat);
+                    decodedFloat = Linear01Depth(decodedFloat);
+
+                    //Linear01Depth(float z)
+                    //LinearEyeDepth(float z)
+
                     return decodedFloat;
                 #endif
             }
