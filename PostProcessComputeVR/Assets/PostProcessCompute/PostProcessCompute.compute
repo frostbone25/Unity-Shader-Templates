@@ -1,0 +1,183 @@
+/*
+* Sources
+* https://forum.unity.com/threads/accessing-builtin-textures-from-a-compute-shader.393528/
+*/
+
+#include "Packages/com.unity.postprocessing/PostProcessing/Shaders/StdLib.hlsl"
+
+//|||||||||||||||||||||||||||||||||||||| TEXTURES ||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||| TEXTURES ||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||| TEXTURES ||||||||||||||||||||||||||||||||||||||
+
+SamplerState _PointClamp;
+SamplerState _LinearClamp;
+
+float TEX2D_SHARP(Texture2D<float> tex, float2 uv)
+{
+    return tex.SampleLevel(_PointClamp, uv, 0);
+}
+
+float2 TEX2D_SHARP(Texture2D<float2> tex, float2 uv)
+{
+    return tex.SampleLevel(_PointClamp, uv, 0);
+}
+
+float3 TEX2D_SHARP(Texture2D<float3> tex, float2 uv)
+{
+    return tex.SampleLevel(_PointClamp, uv, 0);
+}
+
+float4 TEX2D_SHARP(Texture2D<float4> tex, float2 uv)
+{
+    return tex.SampleLevel(_PointClamp, uv, 0);
+}
+
+float TEX2D(Texture2D<float> tex, float2 uv)
+{
+    return tex.SampleLevel(_LinearClamp, uv, 0);
+}
+
+float2 TEX2D(Texture2D<float2> tex, float2 uv)
+{
+    return tex.SampleLevel(_LinearClamp, uv, 0);
+}
+
+float3 TEX2D(Texture2D<float3> tex, float2 uv)
+{
+    return tex.SampleLevel(_LinearClamp, uv, 0);
+}
+
+float4 TEX2D(Texture2D<float4> tex, float2 uv)
+{
+    return tex.SampleLevel(_LinearClamp, uv, 0);
+}
+
+//|||||||||||||||||||||||||||||||||||||||||||||| COMPUTE SHADER PROPERTIES ||||||||||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||||||||||| COMPUTE SHADER PROPERTIES ||||||||||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||||||||||| COMPUTE SHADER PROPERTIES ||||||||||||||||||||||||||||||||||||||||||||||
+
+//Raw Buffers
+bool _ShowRawDepthTexture;
+bool _ShowRawDepthNormalsTexture;
+bool _ShowRawMotionVectorsTexture;
+
+//Calculated Buffers
+bool _ShowLinearEyeDepth;
+bool _ShowLinear01Depth;
+bool _ShowViewNormals;
+bool _ShowWorldNormals;
+bool _ShowViewPosition;
+bool _ShowWorldPosition;
+
+float4x4 _ViewProjInv;
+float4x4 unity_CameraToWorld;
+
+RWTexture2D<float4> _ComputeShaderRenderTexture;
+float2 _ComputeShaderRenderTextureResolution;
+
+Texture2D<float> _CameraDepthTexture;
+Texture2D<float4> _CameraDepthNormalsTexture;
+Texture2D<float2> _CameraMotionVectorsTexture;
+
+//|||||||||||||||||||||||||||||||||||||||||||||| MAIN ||||||||||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||||||||||| MAIN ||||||||||||||||||||||||||||||||||||||||||||||
+//|||||||||||||||||||||||||||||||||||||||||||||| MAIN ||||||||||||||||||||||||||||||||||||||||||||||
+
+#pragma kernel ComputeShaderMain
+[numthreads(8,8,1)]
+void ComputeShaderMain(uint3 id : SV_DispatchThreadID)
+{
+    float2 normalizedUV = id.xy / _ComputeShaderRenderTextureResolution;
+
+    float cameraDepthColor = TEX2D(_CameraDepthTexture, normalizedUV);
+    float4 cameraDepthNormalsColor = TEX2D(_CameraDepthNormalsTexture, normalizedUV);
+    float2 cameraMotionVectorsColor = TEX2D(_CameraMotionVectorsTexture, normalizedUV);
+
+    //------------------------------- RAW DEPTH TEXTURE -------------------------------
+    if (_ShowRawDepthTexture)
+    {
+        _ComputeShaderRenderTexture[id.xy] = float4(cameraDepthColor, 0, 0, 1);
+        return;
+    }
+
+    //------------------------------- RAW DEPTH NORMALS TEXTURE -------------------------------
+    if (_ShowRawDepthNormalsTexture)
+    {
+        _ComputeShaderRenderTexture[id.xy] = float4(cameraDepthNormalsColor.rgb, 1);
+        return;
+    }
+
+    //------------------------------- RAW MOTION VECTORS TEXTURE -------------------------------
+    if (_ShowRawMotionVectorsTexture)
+    {
+        _ComputeShaderRenderTexture[id.xy] = float4(cameraMotionVectorsColor, 0, 1);
+        return;
+    }
+
+    //------------------------------- LINEAR 01 DEPTH -------------------------------
+    if (_ShowLinear01Depth)
+    {
+        float linear01Depth = Linear01Depth(cameraDepthColor);
+
+        _ComputeShaderRenderTexture[id.xy] = float4(linear01Depth, linear01Depth, linear01Depth, 1);
+        return;
+    }
+
+    //------------------------------- LINEAR EYE DEPTH -------------------------------
+    if (_ShowLinearEyeDepth)
+    {
+        float linearEyeDepth = LinearEyeDepth(cameraDepthColor);
+
+        _ComputeShaderRenderTexture[id.xy] = float4(linearEyeDepth, linearEyeDepth, linearEyeDepth, 1);
+        return;
+    }
+
+    //------------------------------- VIEW NORMALS -------------------------------
+    if (_ShowViewNormals)
+    {
+        float3 computedViewNormals = DecodeViewNormalStereo(cameraDepthNormalsColor);
+
+        _ComputeShaderRenderTexture[id.xy] = float4(computedViewNormals, 1);
+        return;
+    }
+
+    //------------------------------- WORLD NORMALS -------------------------------
+    if (_ShowWorldNormals)
+    {
+        float3 computedViewNormals = DecodeViewNormalStereo(cameraDepthNormalsColor);
+        float3 computedWorldNormals = mul((float3x3)unity_CameraToWorld, computedViewNormals) * float3(1.0, 1.0, -1.0);
+
+        _ComputeShaderRenderTexture[id.xy] = float4(computedWorldNormals, 1);
+        return;
+    }
+
+    //------------------------------- VIEW POSITION -------------------------------
+    if (_ShowViewPosition)
+    {
+        float3 computedViewPosition = float3(0, 0, 0);
+        computedViewPosition.x = (normalizedUV.x * 2.0f) - 1.0f;
+        computedViewPosition.y = (normalizedUV.y * 2.0f) - 1.0f;
+        computedViewPosition.z = LinearEyeDepth(cameraDepthColor);
+        computedViewPosition.xy *= computedViewPosition.z;
+
+        _ComputeShaderRenderTexture[id.xy] = float4(computedViewPosition, 1);
+        return;
+    }
+
+    //------------------------------- WORLD POSITION -------------------------------
+    if (_ShowWorldPosition)
+    {
+        float4 computedWorldPosition = float4(0, 0, 0, 1);
+        computedWorldPosition.x = (normalizedUV.x * 2.0f) - 1.0f;
+        computedWorldPosition.y = (normalizedUV.y * 2.0f) - 1.0f;
+        computedWorldPosition.z = cameraDepthColor.r;
+        computedWorldPosition = mul(_ViewProjInv, computedWorldPosition);
+        computedWorldPosition /= computedWorldPosition.w;
+
+        _ComputeShaderRenderTexture[id.xy] = float4(computedWorldPosition.xyz, 1);
+        return;
+    }
+
+    //default: show UVs
+    _ComputeShaderRenderTexture[id.xy] = float4(normalizedUV, 0, 1);
+}
