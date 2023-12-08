@@ -39,7 +39,7 @@ MonoBehaviour:
     value: 0
   showViewNormals:
     overrideState: 1
-    value: 0
+    value: 1
   showWorldNormals:
     overrideState: 1
     value: 0
@@ -48,7 +48,7 @@ MonoBehaviour:
     value: 0
   showWorldPosition:
     overrideState: 1
-    value: 1
+    value: 0
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,3 +63,47 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   settings:
   - {fileID: -596477537660347081}
+  - {fileID: 2762922487104017007}
+--- !u!114 &2762922487104017007
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ef96d75126266b4f80fd945630e3de2, type: 3}
+  m_Name: PostProcess
+  m_EditorClassIdentifier: 
+  active: 1
+  enabled:
+    overrideState: 1
+    value: 1
+  showRawDepthTexture:
+    overrideState: 1
+    value: 0
+  showRawDepthNormalsTexture:
+    overrideState: 1
+    value: 0
+  showRawMotionVectorsTexture:
+    overrideState: 1
+    value: 0
+  showLinearEyeDepth:
+    overrideState: 1
+    value: 0
+  showLinear01Depth:
+    overrideState: 1
+    value: 0
+  showViewNormals:
+    overrideState: 1
+    value: 0
+  showWorldNormals:
+    overrideState: 1
+    value: 0
+  showViewPosition:
+    overrideState: 1
+    value: 0
+  showWorldPosition:
+    overrideState: 1
+    value: 0
