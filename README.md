@@ -1,10 +1,10 @@
 # Unity Shader Templates
 A ***W.I.P*** project containing various shader templates designed for VR *(and non-vr)*.
 
-### Object Shader
+## Object Shader
 ***Work In Progress***
 
-### Object "Post Process" Shader
+## Object "Post Process" Shader
 An object-based shader that can be used to do post-processing without blitting to a render target *(VRChat-like case where functionality is limited)*.
 
 This is a bit of a complex shader but it. It works with the 3 built-in camera textures *(Depth, DepthNormals, MotionVector)* 
@@ -18,7 +18,7 @@ This is a bit of a complex shader but it. It works with the 3 built-in camera te
 - **View Position**
 - **World Position**
 
-### Post Processing Shader
+## Post Processing Shader
 *Based on the Unity Post Processing Stack.*
 
 This is a single-pass effect. It works with the 3 built-in camera textures *(Depth, DepthNormals, MotionVector)* and uses them to calculate buffers you often might need: 
@@ -32,7 +32,7 @@ This is a single-pass effect. It works with the 3 built-in camera textures *(Dep
 - **View Position**
 - **World Position**
 
-### Compute Based Post Processing Shader
+## Compute Based Post Processing Shader
 *Based on the Unity Post Processing Stack.*
 
 This is a single-pass effect, identical to the regular post-process variant. It works with the 3 built-in camera textures *(Depth, DepthNormals, MotionVector)* and uses them to calculate buffers you often might need: 
@@ -48,22 +48,32 @@ This is a single-pass effect, identical to the regular post-process variant. It 
 
 ### Additional Notes
 
-**Linear Eye Depth:** Is calculated by using depth from _CameraDepthTexture. It can also be calculated by using depth unpacked from _CameraDepthNormalsTexture.
+### Linear Eye Depth 
+This is calculated by using depth from _CameraDepthTexture. It can also be calculated by using depth unpacked from _CameraDepthNormalsTexture.
 
-**Linear 01 Depth:** Is calculated by using depth from _CameraDepthTexture. It can also be calculated by using depth unpacked from _CameraDepthNormalsTexture.
+### Linear 01 Depth
+This is calculated by using depth from _CameraDepthTexture. It can also be calculated by using depth unpacked from _CameraDepthNormalsTexture.
 
-**View Normals:** Is calculated by unpacking view normals from _CameraDepthNormalsTexture. It can also be calculated by generating normals from depth, although there is a caveat to that. Generating normals from depth will not retain any normal information on meshes, and therefore polygons that are supposed to appear "smooth" will not appear as such because we are essentially only working with position. With that said it's still a viable solution. Depth is sampled either from the _CameraDepthTexture, or unpacked from _CameraDepthNormalsTexture *(Although this has issues at the moment for normals due to lack of precision)*. With the given depth, normals can be generated with different techniques that are implemented in the templates. 
+### View Normals
+This is calculated by unpacking view normals from _CameraDepthNormalsTexture. It can also be calculated by generating normals from depth, although there is a caveat to that. 
+
+Generating normals from depth will not retain any normal information on meshes, and therefore polygons that are supposed to appear "smooth" will not appear as such because we are essentially only working with position. With that said it's still a viable solution. 
+
+Depth is sampled either from the _CameraDepthTexture, or unpacked from _CameraDepthNormalsTexture *(Although this has issues at the moment for normals due to lack of precision)*. With the given depth, normals can be generated with different techniques that are implemented. 
 - **"1 Tap Quad Intrinsics"** which calculates normals by sampling one depth texture, and using quad intrinsics to read the difference in depth values within a 2x2 pixel block to generate normals.
 - **"3 Tap"** which calculates normals by sampling three depth textures to generate normals.
 - **"4 Tap"** which calculates normals by sampling four depth textures to generate normals.
 - **"Improved"** which calculates normals by sampling four depth textures to generate normals.
 - **"Accurate"** which calculates normals by sampling 14 depth textures to generate normals.
 
-**World Normals:** Does the same as View Normals except transform them into world space.
+### World Normals
+Does the same as View Normals except transforms them into world space.
 
-**View Position:** Is calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture.
+### View Position
+Is calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture.
 
-**World Position:** Is calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture.
+### World Position
+Is calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture.
 
 # Screenshots
 
