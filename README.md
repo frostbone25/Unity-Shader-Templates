@@ -1,7 +1,52 @@
-# Unity Post Process Compute VR Template
-A ***W.I.P*** template for a compute shader based post processing template designed for VR *(and non-vr)* using the Unity Post Processing Stack.
+# Unity Shader Templates
+A ***W.I.P*** project containing various shader templates designed for VR *(and non-vr)*.
 
-This is a basic template effect that is a single pass, and works with the 3 built-in camera textures *(Depth, DepthNormals, MotionVector)* all calculated and sampled correctly. No other additional things are done, it's just a simple template for a compute based post process shader.
+#### Object Shader
+***Work In Progress***
+
+#### Object "Post Process" Shader
+An object-based shader that can be used to do post-processing without blitting to a render target *(VRChat-like case where functionality is limited)*.
+
+This is a bit of a complex shader but it. It works with the 3 built-in camera textures *(Depth, DepthNormals, MotionVector)* 
+- **Raw Camera Depth Texture**
+- **Raw Camera Depth Normals Texture**
+- **Raw Camera Motion Vectors**
+- **Linear Eye Depth:** *(Depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+- **Linear 01 Depth:** *(Depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+- **View Normals:** *(Normals unpacked from _CameraDepthNormalsTexture, normals calculated from _CameraDepthTexture)*
+- **World Normals:** *(Normals unpacked from _CameraDepthNormalsTexture, normals calculated from _CameraDepthTexture)*
+- **View Position:** *(Calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+- **World Position:** *(Calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+
+#### Post Processing Shader
+*Based on the Unity Post Processing Stack.*
+
+This is a single-pass effect. It works with the 3 built-in camera textures *(Depth, DepthNormals, MotionVector)* and uses them to calculate buffers you often might need: 
+- **Raw Camera Depth Texture**
+- **Raw Camera Depth Normals Texture**
+- **Raw Camera Motion Vectors**
+- **Linear Eye Depth:** *(Depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+- **Linear 01 Depth:** *(Depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+- **View Normals:** *(Normals unpacked from _CameraDepthNormalsTexture, normals calculated from _CameraDepthTexture)*
+- **World Normals:** *(Normals unpacked from _CameraDepthNormalsTexture, normals calculated from _CameraDepthTexture)*
+- **View Position:** *(Calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+- **World Position:** *(Calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+
+#### Compute Based Post Processing Shader
+*Based on the Unity Post Processing Stack.*
+
+This is a single-pass effect, identical to the regular post-process variant. It works with the 3 built-in camera textures *(Depth, DepthNormals, MotionVector)* and uses them to calculate buffers you often might need: 
+- **Raw Camera Depth Texture**
+- **Raw Camera Depth Normals Texture**
+- **Raw Camera Motion Vectors**
+- **Linear Eye Depth:** *(Depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+- **Linear 01 Depth:** *(Depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+- **View Normals:** *(Normals unpacked from _CameraDepthNormalsTexture, normals calculated from _CameraDepthTexture)*
+- **World Normals:** *(Normals unpacked from _CameraDepthNormalsTexture, normals calculated from _CameraDepthTexture)*
+- **View Position:** *(Calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+- **World Position:** *(Calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
+
+# Screenshots
 
 ![post-process](GithubContent/post-process.png)
 
