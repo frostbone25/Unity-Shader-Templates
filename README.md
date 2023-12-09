@@ -1,10 +1,10 @@
 # Unity Shader Templates
 A ***W.I.P*** project containing various shader templates designed for VR *(and non-vr)*.
 
-#### Object Shader
+### Object Shader
 ***Work In Progress***
 
-#### Object "Post Process" Shader
+### Object "Post Process" Shader
 An object-based shader that can be used to do post-processing without blitting to a render target *(VRChat-like case where functionality is limited)*.
 
 This is a bit of a complex shader but it. It works with the 3 built-in camera textures *(Depth, DepthNormals, MotionVector)* 
@@ -18,7 +18,7 @@ This is a bit of a complex shader but it. It works with the 3 built-in camera te
 - **View Position:** *(Calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
 - **World Position:** *(Calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
 
-#### Post Processing Shader
+### Post Processing Shader
 *Based on the Unity Post Processing Stack.*
 
 This is a single-pass effect. It works with the 3 built-in camera textures *(Depth, DepthNormals, MotionVector)* and uses them to calculate buffers you often might need: 
@@ -32,7 +32,7 @@ This is a single-pass effect. It works with the 3 built-in camera textures *(Dep
 - **View Position:** *(Calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
 - **World Position:** *(Calculated with depth from _CameraDepthTexture, or depth unpacked from _CameraDepthNormalsTexture)*
 
-#### Compute Based Post Processing Shader
+### Compute Based Post Processing Shader
 *Based on the Unity Post Processing Stack.*
 
 This is a single-pass effect, identical to the regular post-process variant. It works with the 3 built-in camera textures *(Depth, DepthNormals, MotionVector)* and uses them to calculate buffers you often might need: 
