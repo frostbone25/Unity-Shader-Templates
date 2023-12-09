@@ -9,8 +9,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: ObjectPostProcess
   m_Shader: {fileID: 4800000, guid: e378b963e997be4448bb6cd26d595df6, type: 3}
-  m_ShaderKeywords: _DEPTHTYPE_FROMCAMERADEPTHNORMALS _NORMALTYPE_CAMERADEPTHNORMALS
-    _SHOWBUFFER_LINEAR01DEPTH
+  m_ShaderKeywords: USE_QUAD_INTRINSICS_OPTIMIZATION _DEPTHTYPE_FROMCAMERADEPTH _NORMALTYPE_IMPROVED_QUAD_INTRINSICS
+    _SHOWBUFFER_VIEWNORMALS
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -59,7 +59,7 @@ Material:
     m_Floats:
     - _BumpScale: 1
     - _Cutoff: 0.5
-    - _DepthType: 1
+    - _DepthType: 0
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
@@ -68,10 +68,11 @@ Material:
     - _Metallic: 0
     - _Mode: 0
     - _NormalReconstructionType: 0
-    - _NormalType: 0
+    - _NormalType: 2
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _ShowBuffer: 5
+    - _QuadIntrinsics: 1
+    - _ShowBuffer: 6
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
