@@ -71,6 +71,7 @@ bool _ShowWorldPosition;
 
 float4x4 _ViewProjInv;
 float4x4 unity_CameraToWorld;
+float4x4 unity_CameraInvProjection;
 
 RWTexture2D<float4> _ComputeShaderRenderTexture;
 float2 _ComputeShaderRenderTextureResolution;
@@ -154,11 +155,8 @@ void ComputeShaderMain(uint3 id : SV_DispatchThreadID)
     //------------------------------- VIEW POSITION -------------------------------
     if (_ShowViewPosition)
     {
-        float3 computedViewPosition = float3(0, 0, 0);
-        computedViewPosition.x = (normalizedUV.x * 2.0f) - 1.0f;
-        computedViewPosition.y = (normalizedUV.y * 2.0f) - 1.0f;
-        computedViewPosition.z = LinearEyeDepth(cameraDepthColor);
-        computedViewPosition.xy *= computedViewPosition.z;
+        float3 computedViewPosition = mul(unity_CameraInvProjection, float4(normalizedUV * 2 - 1, 1, 1) * _ProjectionParams.z);
+        computedViewPosition *= Linear01Depth(cameraDepthColor);
 
         _ComputeShaderRenderTexture[id.xy] = float4(computedViewPosition, 1);
         return;

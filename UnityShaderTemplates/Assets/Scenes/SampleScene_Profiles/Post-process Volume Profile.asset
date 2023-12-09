@@ -39,7 +39,7 @@ MonoBehaviour:
     value: 0
   showViewNormals:
     overrideState: 1
-    value: 1
+    value: 0
   showWorldNormals:
     overrideState: 1
     value: 0
@@ -76,7 +76,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ef96d75126266b4f80fd945630e3de2, type: 3}
   m_Name: PostProcess
   m_EditorClassIdentifier: 
-  active: 1
+  active: 0
   enabled:
     overrideState: 1
     value: 1

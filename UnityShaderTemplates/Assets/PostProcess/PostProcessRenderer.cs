@@ -59,6 +59,7 @@ namespace PostProcess
             Matrix4x4 viewProjMat = GL.GetGPUProjectionMatrix(context.camera.projectionMatrix, false) * context.camera.worldToCameraMatrix;
             sheet.properties.SetMatrix("_ViewProjInv", viewProjMat.inverse);
             sheet.properties.SetMatrix("unity_CameraToWorld", context.camera.cameraToWorldMatrix);
+            sheet.properties.SetMatrix("unity_CameraInvProjection", context.camera.projectionMatrix.inverse);
 
             sheet.properties.SetInt("_ShowRawDepthTexture", settings.showRawDepthTexture ? 1 : 0);
             sheet.properties.SetInt("_ShowRawDepthNormalsTexture", settings.showRawDepthNormalsTexture ? 1 : 0);

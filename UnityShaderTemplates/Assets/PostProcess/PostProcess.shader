@@ -36,6 +36,7 @@
 
 			float4x4 _ViewProjInv;
 			float4x4 unity_CameraToWorld;
+			float4x4 unity_CameraInvProjection;
 
 			struct meshData
 			{
@@ -135,11 +136,8 @@
 				//------------------------------- VIEW POSITION -------------------------------
 				if (_ShowViewPosition > 0)
 				{
-					float3 computedViewPosition = float3(0, 0, 0);
-					computedViewPosition.x = (uv.x * 2.0f) - 1.0f;
-					computedViewPosition.y = (uv.y * 2.0f) - 1.0f;
-					computedViewPosition.z = LinearEyeDepth(cameraDepthColor);
-					computedViewPosition.xy *= computedViewPosition.z;
+					float3 computedViewPosition = mul(unity_CameraInvProjection, float4(uv * 2 - 1, 1, 1) * _ProjectionParams.z);
+					computedViewPosition *= Linear01Depth(cameraDepthColor);
 
 					return float4(computedViewPosition, 1);
 				}

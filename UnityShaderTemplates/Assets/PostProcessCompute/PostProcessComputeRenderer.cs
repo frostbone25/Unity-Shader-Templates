@@ -90,6 +90,7 @@ namespace PostProcessCompute
             Matrix4x4 viewProjMat = GL.GetGPUProjectionMatrix(context.camera.projectionMatrix, false) * context.camera.worldToCameraMatrix;
             computeShader.SetMatrix("_ViewProjInv", viewProjMat.inverse);
             computeShader.SetMatrix("unity_CameraToWorld", context.camera.cameraToWorldMatrix);
+            computeShader.SetMatrix("unity_CameraInvProjection", context.camera.projectionMatrix.inverse);
 
             computeShader.SetBool("_ShowRawDepthTexture", settings.showRawDepthTexture);
             computeShader.SetBool("_ShowRawDepthNormalsTexture", settings.showRawDepthNormalsTexture);

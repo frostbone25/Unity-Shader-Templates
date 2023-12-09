@@ -1,4 +1,4 @@
-    /*
+        /*
 * Sources
 * - https://gist.github.com/bgolus/a07ed65602c009d5e2f753826e8078a0
 */
@@ -9,7 +9,7 @@ Shader "Unlit/ObjectPostProcess"
     {
         [KeywordEnum(None, RawDepth, RawDepthNormals, RawMotionVectors, LinearEyeDepth, Linear01Depth, ViewNormals, WorldNormals, ViewPosition, WorldPosition)] _ShowBuffer("Show Buffer", Float) = 0
         [KeywordEnum(FromCameraDepth, FromCameraDepthNormals)] _DepthType("Depth Type", Float) = 0
-        [KeywordEnum(CameraDepthNormals, 1 Tap Quad Intrinsics, Improved Quad Intrinsics, 3 Tap, 4 Tap, Improved, Accurate)] _NormalType("Normal Reconstruction Type", Float) = 0
+        [KeywordEnum(CameraDepthNormals, 1 Tap Quad Intrinsics, Improved Quad Intrinsics, 3 Taps, 4 Taps, 4 Taps Improved, 14 Taps Accurate)] _NormalType("Normal Reconstruction Type", Float) = 0
     }
     SubShader
     {
@@ -33,10 +33,16 @@ Shader "Unlit/ObjectPostProcess"
 
             #pragma multi_compile _SHOWBUFFER_NONE _SHOWBUFFER_RAWDEPTH _SHOWBUFFER_RAWDEPTHNORMALS _SHOWBUFFER_RAWMOTIONVECTORS _SHOWBUFFER_LINEAREYEDEPTH _SHOWBUFFER_LINEAR01DEPTH _SHOWBUFFER_VIEWNORMALS _SHOWBUFFER_WORLDNORMALS _SHOWBUFFER_VIEWPOSITION _SHOWBUFFER_WORLDPOSITION
             #pragma multi_compile _DEPTHTYPE_FROMCAMERADEPTH _DEPTHTYPE_FROMCAMERADEPTHNORMALS
-            #pragma multi_compile _NORMALTYPE_CAMERADEPTHNORMALS _NORMALTYPE_3_TAP _NORMALTYPE_4_TAP _NORMALTYPE_IMPROVED _NORMALTYPE_ACCURATE _NORMALTYPE_1_TAP_QUAD_INTRINSICS _NORMALTYPE_IMPROVED_QUAD_INTRINSICS
+            #pragma multi_compile _NORMALTYPE_CAMERADEPTHNORMALS _NORMALTYPE_3_TAPS _NORMALTYPE_4_TAPS _NORMALTYPE_4_TAPS_IMPROVED _NORMALTYPE_14_TAPS_ACCURATE _NORMALTYPE_1_TAP_QUAD_INTRINSICS _NORMALTYPE_IMPROVED_QUAD_INTRINSICS
 
-            #pragma target 5.0
-            #include "QuadIntrinsics.cginc"
+            #if defined (_NORMALTYPE_1_TAP_QUAD_INTRINSICS) || (_NORMALTYPE_IMPROVED_QUAD_INTRINSICS)
+                #define USING_QUAD_INTRINSICS
+            #endif
+
+            //#if defined (USING_QUAD_INTRINSICS)
+                #pragma target 5.0
+                #include "QuadIntrinsics.cginc"
+            //#endif
 
             #include "UnityCG.cginc"
 
@@ -160,21 +166,28 @@ Shader "Unlit/ObjectPostProcess"
                     // get current pixel's view space position
                     half3 viewSpacePos_origin = viewSpacePosAtScreenUV(uv);
                     half3 viewSpacePos_up = viewSpacePosAtScreenUV(uv + float2(0, 1) * _CameraDepthTexture_TexelSize.xy);
+                    half3 viewSpacePos_left = viewSpacePosAtScreenUV(uv - float2(1, 0) * _CameraDepthTexture_TexelSize.xy);
 
-                    // get view space position at 1 pixel offsets in each major direction
                     half3 viewSpacePos_origin_topLeft = QuadReadLaneAt(viewSpacePos_origin, uint2(0, 0));
                     half3 viewSpacePos_origin_topRight = QuadReadLaneAt(viewSpacePos_origin, uint2(1, 0));
                     half3 viewSpacePos_origin_bottomLeft = QuadReadLaneAt(viewSpacePos_origin, uint2(0, 1));
                     half3 viewSpacePos_origin_bottomRight = QuadReadLaneAt(viewSpacePos_origin, uint2(1, 1));
 
-                    // get view space position at 1 pixel offsets in each major direction
-                    half3 viewSpacePos_up_bottomLeft = QuadReadLaneAt(viewSpacePos_up, uint2(0, 0));
+                    half3 viewSpacePos_up_topLeft = QuadReadLaneAt(viewSpacePos_up, uint2(0, 0));
+                    half3 viewSpacePos_up_topRight = QuadReadLaneAt(viewSpacePos_up, uint2(1, 0));
+                    half3 viewSpacePos_up_bottomLeft = QuadReadLaneAt(viewSpacePos_up, uint2(0, 1));
+                    half3 viewSpacePos_up_bottomRight = QuadReadLaneAt(viewSpacePos_up, uint2(1, 1));
+
+                    half3 viewSpacePos_left_topLeft = QuadReadLaneAt(viewSpacePos_left, uint2(0, 0));
+                    half3 viewSpacePos_left_topRight = QuadReadLaneAt(viewSpacePos_left, uint2(1, 0));
+                    half3 viewSpacePos_left_bottomLeft = QuadReadLaneAt(viewSpacePos_left, uint2(0, 1));
+                    half3 viewSpacePos_left_bottomRight = QuadReadLaneAt(viewSpacePos_left, uint2(1, 1));
 
                     // get the difference between the current and each offset position
-                    half3 leftDifference = viewSpacePos_origin_topLeft - viewSpacePos_origin_topRight;
+                    half3 leftDifference = viewSpacePos_left_topRight - viewSpacePos_left_topLeft;
                     half3 rightDifference = viewSpacePos_origin_topRight - viewSpacePos_origin_topLeft;
                     half3 downDifference = viewSpacePos_origin_bottomLeft - viewSpacePos_origin_topLeft;
-                    half3 upDifference = viewSpacePos_up_bottomLeft - viewSpacePos_origin_topLeft;
+                    half3 upDifference = viewSpacePos_up_bottomLeft - viewSpacePos_up_topLeft;
 
                     // pick horizontal and vertical diff with the smallest z difference
                     half3 horizontalDifference = abs(leftDifference.z) < abs(rightDifference.z) ? leftDifference : rightDifference;
@@ -184,7 +197,7 @@ Shader "Unlit/ObjectPostProcess"
                     half3 viewNormal = normalize(cross(horizontalDifference, verticalDifference));
 
                     return viewNormal;
-                #elif defined (_NORMALTYPE_3_TAP)
+                #elif defined (_NORMALTYPE_3_TAPS)
                     // get current pixel's view space position
                     half3 viewSpacePos_origin = viewSpacePosAtScreenUV(uv);
 
@@ -200,7 +213,7 @@ Shader "Unlit/ObjectPostProcess"
                     half3 viewNormal = normalize(cross(horizontalDifference, verticalDifference));
 
                     return viewNormal;
-                #elif defined (_NORMALTYPE_4_TAP)
+                #elif defined (_NORMALTYPE_4_TAPS)
                     // get view space position at 1 pixel offsets in each major direction
                     half3 viewSpacePos_left = viewSpacePosAtScreenUV(uv + float2(-1, 0) * _CameraDepthTexture_TexelSize.xy); //shifted left
                     half3 viewSpacePos_right = viewSpacePosAtScreenUV(uv + float2(1, 0) * _CameraDepthTexture_TexelSize.xy); //shifted right
@@ -215,7 +228,7 @@ Shader "Unlit/ObjectPostProcess"
                     half3 viewNormal = normalize(cross(horizontalDifference, verticalDifference));
 
                     return viewNormal;
-                #elif defined (_NORMALTYPE_IMPROVED)
+                #elif defined (_NORMALTYPE_4_TAPS_IMPROVED)
                     // get current pixel's view space position
                     half3 viewSpacePos_origin = viewSpacePosAtScreenUV(uv);
 
@@ -239,9 +252,9 @@ Shader "Unlit/ObjectPostProcess"
                     half3 viewNormal = normalize(cross(horizontalDifference, verticalDifference));
 
                     return viewNormal;
-                #elif defined (_NORMALTYPE_ACCURATE)
+                #elif defined (_NORMALTYPE_14_TAPS_ACCURATE)
                     // current pixel's depth
-                    float c = SampleDepth(uv);
+                    float currentDepth = SampleDepth(uv);
 
                     // get current pixel's view space position
                     half3 viewSpacePos_origin = viewSpacePosAtScreenUV(uv);
@@ -277,8 +290,8 @@ Shader "Unlit/ObjectPostProcess"
                     // current pixel's depth difference from slope of offset depth samples
                     // differs from original article because we're using non-linear depth values
                     // see article's comments
-                    half2 he = abs((2 * H.xy - H.zw) - c);
-                    half2 ve = abs((2 * V.xy - V.zw) - c);
+                    half2 he = abs((2 * H.xy - H.zw) - currentDepth);
+                    half2 ve = abs((2 * V.xy - V.zw) - currentDepth);
 
                     // pick horizontal and vertical diff with the smallest depth difference from slopes
                     half3 horizontalDifference = he.x < he.y ? leftDifference : rightDifference;
@@ -298,7 +311,9 @@ Shader "Unlit/ObjectPostProcess"
                 //Single Pass Instanced Support
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 
-                SETUP_QUAD_INTRINSICS(i.vertex)
+                #if defined (USING_QUAD_INTRINSICS)
+                    SETUP_QUAD_INTRINSICS(i.vertex)
+                #endif
 
                 float2 screenUV = i.screenPos.xy / i.screenPos.w;
 
@@ -358,14 +373,9 @@ Shader "Unlit/ObjectPostProcess"
                 #endif
 
                 #if defined (_SHOWBUFFER_VIEWPOSITION)
-                    float3 computedViewPosition = float3(0, 0, 0);
-                    computedViewPosition.x = (screenUV.x * 2.0f) - 1.0f;
-                    computedViewPosition.y = (screenUV.y * 2.0f) - 1.0f;
-
+                    float3 computedViewPosition = mul(unity_CameraInvProjection, float4(screenUV * 2 - 1, 1, 1) * _ProjectionParams.z);
                     float rawDepth = SampleDepth(screenUV);
-                    computedViewPosition.z = LinearEyeDepth(rawDepth);
- 
-                    computedViewPosition.xy *= computedViewPosition.z;
+                    computedViewPosition *= Linear01Depth(rawDepth);
 
                     return float4(computedViewPosition, 1);
                 #endif
