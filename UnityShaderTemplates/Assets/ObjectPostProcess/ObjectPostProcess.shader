@@ -115,6 +115,8 @@ Shader "Unlit/ObjectPostProcess"
                     //Linear01Depth(float z)
                     //LinearEyeDepth(float z)
 
+                    //NOTE TO SELF: Need to scale the decoded depth somehow, when comparing the result with raw depth in the Linear01Depth mode, the decoded depth looks darker.
+
                     return decodedFloat;
                 #endif
             }
