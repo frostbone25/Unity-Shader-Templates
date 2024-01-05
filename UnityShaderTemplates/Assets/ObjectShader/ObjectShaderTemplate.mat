@@ -70,7 +70,7 @@ Material:
     - _NormalStrength: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _ReflectionIntensity: 0
+    - _ReflectionIntensity: 0.25
     - _Smoothness: 0.75
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
