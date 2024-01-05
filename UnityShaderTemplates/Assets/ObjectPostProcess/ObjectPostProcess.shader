@@ -1,4 +1,18 @@
-        /*
+/*
+* NOTES:
+* 
+* When using _CameraDepthNormalsTexture there are some precison problems that potentially one might run into...
+* _CameraDepthNormalsTexture is a texture that uses ARGB32 (4 Channels, 8 bits per channel, 32 bits total)
+* This texture attempts to encode both normals and depth all into 32 bits total.
+* Normals (RG 16 bits) Depth (BA 16bits)
+* Normals only store X and Y, and during decoding the Z value is computed.
+* Depth is also and reconstructed into a 16 bit depth from 2 8 bit channels (BA)
+* Generally this is a pretty nicely packed format for 2 important things... however it's not perfect
+* 
+* Normally depth is 32-bit, but when using 16-bit depth precison things rear its ugly head really quickly
+* 32 bit depth - https://mynameismjp.files.wordpress.com/2010/03/32f_linear.png
+* 16 bit depth - https://mynameismjp.files.wordpress.com/2010/03/16f_linear.png
+* 
 * Sources
 * - https://gist.github.com/bgolus/a07ed65602c009d5e2f753826e8078a0
 */
@@ -10,6 +24,8 @@ Shader "Unlit/ObjectPostProcess"
         [KeywordEnum(None, RawDepth, RawDepthNormals, RawMotionVectors, LinearEyeDepth, Linear01Depth, ViewNormals, WorldNormals, ViewPosition, WorldPosition)] _ShowBuffer("Show Buffer", Float) = 0
         [KeywordEnum(FromCameraDepth, FromCameraDepthNormals)] _DepthType("Depth Type", Float) = 0
         [KeywordEnum(CameraDepthNormals, 1 Tap Quad Intrinsics, Improved Quad Intrinsics, 3 Taps, 4 Taps, 4 Taps Improved, 14 Taps Accurate)] _NormalType("Normal Reconstruction Type", Float) = 0
+
+        _Dithering("Dithering Amount", Range(0, 1)) = 0.1
     }
     SubShader
     {
@@ -54,6 +70,8 @@ Shader "Unlit/ObjectPostProcess"
 
             UNITY_DECLARE_SCREENSPACE_TEXTURE(_CameraMotionVectorsTexture);
             float4 _CameraMotionVectorsTexture_TexelSize;
+
+            float _Dithering;
 
             struct meshData
             {
@@ -142,6 +160,41 @@ Shader "Unlit/ObjectPostProcess"
             {
                 #if defined (_NORMALTYPE_CAMERADEPTHNORMALS)
                     float4 rawCameraDepthNormalsTexture = tex2D(_CameraDepthNormalsTexture, uv);
+
+                    //rawCameraDepthNormalsTexture = rawCameraDepthNormalsTexture + rand(uv) / 255;
+                    //rawCameraDepthNormalsTexture = floor(rawCameraDepthNormalsTexture + 0.5);
+                    //rawCameraDepthNormalsTexture = floor(rawCameraDepthNormalsTexture + rand(uv));
+                    //rawCameraDepthNormalsTexture = floor(rawCameraDepthNormalsTexture + rand(uv) + rand(uv + float2(1, 1)) - 0.5);
+                    //rawCameraDepthNormalsTexture = rawCameraDepthNormalsTexture + (rand(uv) + rand(uv + float2(1, 1)) - 0.5) / 255;
+
+                    //rawCameraDepthNormalsTexture *= (1 - _Dithering) + (rand(uv) * _Dithering);
+                    //rawCameraDepthNormalsTexture += (rand(uv) * _Dithering);
+
+                    //rawCameraDepthNormalsTexture = rawCameraDepthNormalsTexture + (rand(uv) * 2 - 1.0) / 255;
+
+                    //rawCameraDepthNormalsTexture = floor(rawCameraDepthNormalsTexture + 0.5);
+
+                    //rawCameraDepthNormalsTexture samples an 8 bit texture
+                    //rawCameraDepthNormalsTexture *= 32; //scale to 32
+
+
+
+
+                    // Convert the 8-bit color to a float value in the range [0, 1]
+                    // Quantize the color to the nearest representable values
+                    float4 quantizedColor = saturate(floor(rawCameraDepthNormalsTexture * 256.0) / 255.0);
+
+                    // Calculate the quantization error
+                    float4 error = rawCameraDepthNormalsTexture - quantizedColor;
+
+                    
+
+
+
+
+
+                    return float4(error.x, error.y, 0, 1);
+
                     float3 computedViewNormals = DecodeViewNormalStereo(rawCameraDepthNormalsTexture);
 
                     return computedViewNormals;
@@ -366,7 +419,6 @@ Shader "Unlit/ObjectPostProcess"
 
                 #if defined (_SHOWBUFFER_WORLDNORMALS)
                     float3 computedViewNormals = SampleViewNormals(screenUV);
-                    //float3 computedWorldNormals = mul((float3x3)unity_CameraToWorld, computedViewNormals) * float3(1.0, 1.0, -1.0);
                     float3 computedWorldNormals = mul((float3x3)unity_MatrixInvV, computedViewNormals) * float3(1.0, 1.0, -1.0);
 
                     return float4(computedWorldNormals, 1);
