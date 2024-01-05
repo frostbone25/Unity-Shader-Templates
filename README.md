@@ -2,7 +2,21 @@
 A ***W.I.P*** project containing various shader templates designed for VR *(and non-vr)*.
 
 ## Object Shader
-***Work In Progress***
+
+An object-based shader template that has the following...
+- Configurable Cull/ZWrite/ZTest.
+- Normal Maps with Adjustable Strength.
+- Reflections with Box Projection Support.
+- Light Probe Proxy Volume Support.
+- Enlighten Realtime GI Support.
+- Unity Lightmapping Support.
+- Unity Fog Support.
+- Custom Shadow Caster Pass.
+
+And some additional custom things.
+- Functions for Sampling Dominant Directionality from Probes/Proxy Volumes.
+
+***More to be added...***
 
 ## Object "Post Process" Shader
 An object-based shader that can be used to do post-processing without blitting to a render target *(VRChat-like case where functionality is limited)*.

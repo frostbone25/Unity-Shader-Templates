@@ -407,7 +407,7 @@ Shader "Unlit/ObjectShaderTemplate"
                 vector_uv = vector_uv * _MainTex_ST.xy + _MainTex_ST.zw;
 
                 // sample the texture
-                float4 textureColor = tex2D(_MainTex, vector_uv);
+                float4 textureColor = tex2D(_MainTex, vector_uv) * _Color;
 
                 finalColor *= textureColor;
 
